@@ -12,19 +12,19 @@ struct Student {
 
 class StudentDatabase {
 public:
-    // Добавление нового студента
+    // Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ СЃС‚СѓРґРµРЅС‚Р°
     void addStudent(int id, const std::string& name, int age) {
         std::lock_guard<std::mutex> lock(mutex_);
         students_[id] = std::make_shared<Student>(Student{ id, name, age });
     }
 
-    // Удаление студента по идентификатору
+    // РЈРґР°Р»РµРЅРёРµ СЃС‚СѓРґРµРЅС‚Р° РїРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ
     void removeStudent(int id) {
         std::lock_guard<std::mutex> lock(mutex_);
         students_.erase(id);
     }
 
-    // Получение информации о студенте по идентификатору
+    // РџРѕР»СѓС‡РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃС‚СѓРґРµРЅС‚Рµ РїРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ
     std::shared_ptr<Student> getStudent(int id) {
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = students_.find(id);
@@ -41,15 +41,15 @@ private:
     std::mutex mutex_;
 };
 
-// Функция, выполняемая в первом потоке (пишет данные в переменную)
+// Р¤СѓРЅРєС†РёСЏ, РІС‹РїРѕР»РЅСЏРµРјР°СЏ РІ РїРµСЂРІРѕРј РїРѕС‚РѕРєРµ (РїРёС€РµС‚ РґР°РЅРЅС‹Рµ РІ РїРµСЂРµРјРµРЅРЅСѓСЋ)
 void writerThread(StudentDatabase& db) {
     for (int i = 0; i < 5; ++i) {
         db.addStudent(i, "Student" + std::to_string(i), 20 + i);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Для эмуляции работы
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Р”Р»СЏ СЌРјСѓР»СЏС†РёРё СЂР°Р±РѕС‚С‹
     }
 }
 
-// Функция, выполняемая во втором потоке (читает данные из переменной)
+// Р¤СѓРЅРєС†РёСЏ, РІС‹РїРѕР»РЅСЏРµРјР°СЏ РІРѕ РІС‚РѕСЂРѕРј РїРѕС‚РѕРєРµ (С‡РёС‚Р°РµС‚ РґР°РЅРЅС‹Рµ РёР· РїРµСЂРµРјРµРЅРЅРѕР№)
 void readerThread(StudentDatabase& db) {
     for (int i = 0; i < 5; ++i) {
         auto student = db.getStudent(i);
@@ -59,18 +59,18 @@ void readerThread(StudentDatabase& db) {
         else {
             std::cout << "Student with ID " << i << " not found." << std::endl;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Для эмуляции работы
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Р”Р»СЏ СЌРјСѓР»СЏС†РёРё СЂР°Р±РѕС‚С‹
     }
 }
 
 int main() {
     StudentDatabase db;
 
-    // Создание потоков
+    // РЎРѕР·РґР°РЅРёРµ РїРѕС‚РѕРєРѕРІ
     std::thread writer(writerThread, std::ref(db));
     std::thread reader(readerThread, std::ref(db));
 
-    // Ожидание завершения работы потоков
+    // РћР¶РёРґР°РЅРёРµ Р·Р°РІРµСЂС€РµРЅРёСЏ СЂР°Р±РѕС‚С‹ РїРѕС‚РѕРєРѕРІ
     writer.join();
     reader.join();
 
